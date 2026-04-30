@@ -5,6 +5,7 @@ import uuid
 from fastapi import FastAPI, Header, HTTPException, Depends
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from agent import get_agent_type,generate_reply
 
@@ -13,10 +14,13 @@ SECRET_TOKEN = os.getenv("SECRET_TOKEN")
 
 app = FastAPI()
 
+security = HTTPBearer()
+
 class IncomingMessage(BaseModel):
     event_id: str
     user_id: str
     message: str
+    
 
 class SimulateMessage(BaseModel):
     user_id: str
@@ -48,12 +52,12 @@ def init_db():
 
 init_db()
 
-def verify_token(authorization: str = Header(None)):
-    expected_token = f"Bearer {SECRET_TOKEN}"
-
-    if not authorization or authorization != expected_token:
-        raise HTTPException(status_code=401, detail="Unauthorized: Invalid Token")
-    return authorization
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials 
+    
+    if token != SECRET_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid Token")
+    return token
 
 def process_message_logic(payload: IncomingMessage):
     agent = get_agent_type(payload.message)
