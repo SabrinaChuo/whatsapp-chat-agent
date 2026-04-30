@@ -1,5 +1,8 @@
 ﻿# whatsapp-chat-agent
 
+This project demonstrates the core functionality of a WhatsApp chat routing system, including session management and automated agent assignment.
+
+
 Please ensure you have Python 3.8+ installed on your system. You can check your version by running:
 
 `python --version`
